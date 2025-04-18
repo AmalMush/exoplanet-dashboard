@@ -73,7 +73,8 @@ if use_model:
     filtered_df = filtered_df.dropna()  # Drop rows with non-numeric features
 
     # Predict
-    filtered_df["habitability"] = model.predict(filtered_df)
+    filtered_df["habitability"] = model.predict(filtered_df[features])
+
 else:
     filtered_df["habitability"] = (
         (filtered_df["koi_prad"].between(0.5, 2.0)) &
