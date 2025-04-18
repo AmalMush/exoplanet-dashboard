@@ -54,10 +54,40 @@ filtered_df = df[
 
 # Filter by KOI or planet name if search is provided
 if koi_query:
-  filtered_df = filtered_df[
-    filtered_df["kepoi_name"].str.contains(koi_query, case=False, na=False) |
-    filtered_df["kepler_name"].str.contains(koi_query, case=False, na=False)
-]
+    koi_data = df[
+        df["kepoi_name"].str.contains(koi_query, case=False, na=False) |
+        df["kepler_name"].str.contains(koi_query, case=False, na=False)
+    ]
+    
+    if not koi_data.empty:
+        st.markdown("---")
+        st.subheader("🪐 KOI Planet Details")
+        selected = koi_data.iloc[0]
+
+        st.markdown(f"""
+        **KOI Name:** `{selected.get('kepoi_name', 'N/A')}`  
+        **Kepler Name:** `{selected.get('kepler_name', 'N/A')}`  
+        **Planet Radius:** {selected.get('koi_prad', 'N/A')} Earth radii  
+        **Orbital Period:** {selected.get('koi_period', 'N/A')} days  
+        **Star Radius:** {selected.get('koi_srad', 'N/A')} Solar radii  
+        **Star Surface Gravity:** {selected.get('koi_slogg', 'N/A')}  
+        **Equilibrium Temp:** {selected.get('koi_teq', 'N/A')} K  
+        **Insolation Flux:** {selected.get('koi_insol', 'N/A')} Earth = 1  
+        **Stellar Temp:** {selected.get('koi_steff', 'N/A')} K  
+        """)
+
+        if use_model and all(pd.notnull(selected[feature]) for feature in features):
+            pred = model.predict([selected[features].values])[0]
+            st.success(f"🌍 Predicted Habitability (ML): {'✅ Likely Habitable' if pred else '❌ Not Habitable'}")
+        elif not use_model:
+            is_habitable = (
+                0.5 <= selected["koi_prad"] <= 2.0 and
+                0.75 <= selected["koi_insol"] <= 1.5 and
+                4000 <= selected["koi_steff"] <= 7000
+            )
+            st.info(f"🧪 Rule-Based Habitability: {'✅ Likely Habitable' if is_habitable else '❌ Not Habitable'}")
+    else:
+        st.warning("❌ KOI not found. Check the name and try again.")
 
 st.write(f"### 🔍 Showing {len(filtered_df)} planets matching filter criteria")
 st.dataframe(filtered_df[["kepoi_name", "koi_prad", "koi_insol", "koi_teq", "koi_steff", "habitability"]])
