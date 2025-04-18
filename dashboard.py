@@ -23,7 +23,7 @@ def load_data():
     return df
 
 df = load_data()
-st.write("DEBUG - Column Names in DataFrame:", df.columns.tolist())
+# st.write("DEBUG - Column Names in DataFrame:", df.columns.tolist())
 
 @st.cache_resource
 def load_model():
@@ -55,8 +55,9 @@ filtered_df = df[
 # Filter by KOI or planet name if search is provided
 if koi_query:
     filtered_df = filtered_df[
-        filtered_df["kepoi_name"].str.contains(koi_query, case=False, na=False) |
-        filtered_df["pl_name"].str.contains(koi_query, case=False, na=False)
+    filtered_df["kepoi_name"].str.contains(koi_query, case=False, na=False) |
+    filtered_df["kepler_name"].str.contains(koi_query, case=False, na=False)
+]
     ]
 
 st.write(f"### 🔍 Showing {len(filtered_df)} planets matching filter criteria")
