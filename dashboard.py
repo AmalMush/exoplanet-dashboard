@@ -23,6 +23,8 @@ def load_data():
     return df
 
 df = load_data()
+st.write("DEBUG - Column Names in DataFrame:", df.columns.tolist())
+
 @st.cache_resource
 def load_model():
     return joblib.load("model.pkl")
