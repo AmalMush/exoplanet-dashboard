@@ -54,11 +54,11 @@ filtered_df = df[
 
 # Filter by KOI or planet name if search is provided
 if koi_query:
-    filtered_df = filtered_df[
+  filtered_df = filtered_df[
     filtered_df["kepoi_name"].str.contains(koi_query, case=False, na=False) |
     filtered_df["kepler_name"].str.contains(koi_query, case=False, na=False)
 ]
-    ]
+
 
 st.write(f"### 🔍 Showing {len(filtered_df)} planets matching filter criteria")
 st.dataframe(filtered_df[["kepoi_name", "koi_prad", "koi_insol", "koi_teq", "koi_steff", "habitability"]])
