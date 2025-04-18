@@ -10,8 +10,14 @@ st.title("🪐 Exoplanet Habitability Explorer")
 # Load Data
 @st.cache_data
 def load_data():
-    df = pd.read_csv("cumulative.csv")
-    df = df.dropna(subset=["koi_prad", "koi_insol", "koi_steff", "koi_teq"])
+    df = pd.read_csv("cumulative.csv")  # Make sure this file is in the same folder
+
+# TEMP: Show all available column names to debug KeyError
+st.write("Available columns:", df.columns.tolist())
+
+# Comment out this line for now (we’ll fix it after we see the column names)
+# df = df.dropna(subset=["koi_prad", "koi_insol", "koi_steff", "koi_teq"])
+
     df = df[df["koi_disposition"] == "CONFIRMED"]
     df["habitability"] = (
         (df["koi_prad"].between(0.5, 2.0)) &
