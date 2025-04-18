@@ -67,14 +67,20 @@ st.dataframe(filtered_df[["kepoi_name", "koi_prad", "koi_insol", "koi_teq", "koi
 features = ["koi_prad", "koi_period", "koi_srad", "koi_slogg", "koi_teq", "koi_insol", "koi_steff"]
 
 if use_model:
+    # Clean the data for model prediction
     filtered_df = filtered_df.dropna(subset=features)
-    filtered_df["habitability"] = model.predict(filtered_df[features])
+    filtered_df = filtered_df[features].apply(pd.to_numeric, errors='coerce')
+    filtered_df = filtered_df.dropna()  # Drop rows with non-numeric features
+
+    # Predict
+    filtered_df["habitability"] = model.predict(filtered_df)
 else:
     filtered_df["habitability"] = (
         (filtered_df["koi_prad"].between(0.5, 2.0)) &
         (filtered_df["koi_insol"].between(0.75, 1.5)) &
         (filtered_df["koi_steff"].between(4000, 7000))
     ).astype(int)
+
 if koi_query:
     koi_data = df[df["kepoi_name"].str.lower() == koi_query.lower()]
     
