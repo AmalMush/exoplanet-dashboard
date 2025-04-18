@@ -42,23 +42,27 @@ filtered_df = df[
     (df["st_teff"].between(*temp_range))
 ]
 
-# Prediction Features
-features = ["pl_rade", "pl_eqt", "pl_insol", "st_teff", "st_rad", "st_logg"]
+# Prediction Features used in model.pkl
+features = ["pl_rade", "pl_eqt", "pl_insol", "st_teff"]
 
-# ML Prediction
+# ML Prediction with error handling
 if use_model:
     filtered_df = filtered_df.dropna(subset=features)
     filtered_df[features] = filtered_df[features].apply(pd.to_numeric, errors='coerce')
     filtered_df = filtered_df.dropna()
-    filtered_df["habitability"] = model.predict(filtered_df[features])
+
+    if not filtered_df.empty:
+        filtered_df["habitability"] = model.predict(filtered_df[features])
+    else:
+        st.warning("⚠️ No data available after applying filters and cleaning. Try changing the sliders.")
 else:
     filtered_df["habitability"] = (
-        (filtered_df["pl_rade"].between(0.5, 2.0)) &
+        (filtered_df["pl_rade"].between(0.5, 3.0)) &
         (filtered_df["pl_insol"].between(0.75, 1.5)) &
-        (filtered_df["st_teff"].between(4000, 7000))
+        (filtered_df["st_teff"].between(3200, 7000))
     ).astype(int)
 
-# Search by planet name (pl_name)
+# Search by planet name
 if planet_query:
     result_df = df[df["pl_name"].str.contains(planet_query, case=False, na=False)]
     if not result_df.empty:
@@ -74,15 +78,15 @@ if planet_query:
         **Stellar Radius:** {selected.get('st_rad', 'N/A')}  
         **Stellar Surface Gravity:** {selected.get('st_logg', 'N/A')}  
         """)
-
+        
         if use_model and all(pd.notnull(selected[feature]) for feature in features):
             pred = model.predict([selected[features].values])[0]
             st.success(f"🌍 Predicted Habitability (ML): {'✅ Likely Habitable' if pred else '❌ Not Habitable'}")
         elif not use_model:
             is_hab = (
-                0.5 <= selected["pl_rade"] <= 2.0 and
+                0.5 <= selected["pl_rade"] <= 3.0 and
                 0.75 <= selected["pl_insol"] <= 1.5 and
-                4000 <= selected["st_teff"] <= 7000
+                3200 <= selected["st_teff"] <= 7000
             )
             st.info(f"🧪 Rule-Based Habitability: {'✅ Likely Habitable' if is_hab else '❌ Not Habitable'}")
     else:
